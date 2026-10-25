@@ -30,4 +30,15 @@ Các toán hạng được biểu diễn dưới dạng đa thức nhị phân. 
 
 ```bash
 gcc -std=c11 -Wall -Wextra -Wpedantic -Werror src/main.c -o gf2mul.exe
-Chạy chương trình dùng lệnh ./gf2mul.exe
+```
+Chạy chương trình dùng lệnh `./gf2mul.exe`
+
+## Test cases
+
+### GF(2^4)
+- Input: A = 0x7, B = 0x8
+- Expected result: 0xD
+
+### GF(2^8)
+- Input: A = 0x57, B = 0x83
+- Expected result: 0xC1
