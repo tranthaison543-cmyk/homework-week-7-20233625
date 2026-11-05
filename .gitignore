@@ -1,0 +1,9 @@
+# Compiled executable
+gf2mul.exe
+
+# Object files
+*.o
+
+
+# Temporary files
+*.tmp
