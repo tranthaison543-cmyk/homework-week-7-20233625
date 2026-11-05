@@ -34,6 +34,24 @@ run_case() {
     fi
 }
 
+run_error_case() {
+    local name="$1"
+    local input="$2"
+    local expected="$3"
+    local output
+
+    output="$(printf '%s' "$input" | "$BIN" 2>&1 || true)"
+
+    if grep -Fq "$expected" <<< "$output"; then
+        echo "PASS: $name"
+        pass=$((pass + 1))
+    else
+        echo "FAIL: $name"
+        echo "$output"
+        fail=$((fail + 1))
+    fi
+}
+
 echo
 echo "Testing GF(2^4)..."
 
@@ -42,6 +60,7 @@ run_case "Multiplication by one" 1 "1 7" "0x7"
 run_case "Reduction modulo 0x13" 1 "7 8" "0xD"
 run_case "Polynomial multiplication" 1 "3 3" "0x5"
 run_case "Maximum operands" 1 "F F" "0xA"
+run_case "Lowercase hexadecimal input" 1 "a f" "0xC"
 
 echo
 echo "Testing GF(2^8)..."
@@ -55,21 +74,26 @@ run_case "Maximum operands" 2 "FF FF" "0x13"
 echo
 echo "Testing invalid input..."
 
-output="$(printf '1\n10 2\n' | "$BIN" 2>&1 || true)"
+run_error_case "Reject out-of-range GF(2^4) operand" \
+    "1\n10 2\n" "Error"
 
-if grep -Fq "Error" <<< "$output"; then
-    echo "PASS: Reject out-of-range operand"
-    pass=$((pass + 1))
-else
-    echo "FAIL: Reject out-of-range operand"
-    echo "$output"
-    fail=$((fail + 1))
-fi
+run_error_case "Reject out-of-range GF(2^8) operand" \
+    "2\n100 2\n" "Error"
+
+run_error_case "Reject invalid field choice" \
+    "3\n" "Error: invalid field choice."
+
+run_error_case "Reject non-hexadecimal input" \
+    "1\nG 2\n" "Error: invalid input."
+
+run_error_case "Reject missing operand" \
+    "1\n7\n" "Error: invalid input."
 
 echo
 echo "=============================="
 echo "Passed: $pass"
 echo "Failed: $fail"
+echo "Total:  $((pass + fail))"
 echo "=============================="
 
 if [[ "$fail" -ne 0 ]]; then
