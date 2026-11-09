@@ -85,18 +85,77 @@ m = (unsigned int)choice;
 
     printf("Enter a and b in hexadecimal (e.g. 7 D): ");
 
-    if (scanf("%x %x", &a, &b) != 2) {
-        printf("Error: invalid input.\n");
-        return 1;
-    }
+unsigned int limit = 1u << m;
+unsigned long value_a, value_b;
+char *cursor;
 
-    unsigned int limit = 1u << m;
+if (fgets(input, sizeof(input), stdin) == NULL) {
+    printf("Error: invalid input.\n");
+    return 1;
+}
 
-    if (a >= limit || b >= limit) {
-        printf("Error: operands must be between 0 and 0x%X.\n",
-               limit - 1);
-        return 1;
-    }
+cursor = input;
+
+/* Skip leading whitespace. */
+while (isspace((unsigned char)*cursor)) {
+    cursor++;
+}
+
+/* Reject negative or empty input. */
+if (*cursor == '-' || *cursor == '\0') {
+    printf("Error: invalid input.\n");
+    return 1;
+}
+
+/* Read the first hexadecimal operand. */
+errno = 0;
+value_a = strtoul(cursor, &end, 16);
+
+if (cursor == end || errno == ERANGE) {
+    printf("Error: invalid input.\n");
+    return 1;
+}
+
+cursor = end;
+
+/* Skip whitespace between operands. */
+while (isspace((unsigned char)*cursor)) {
+    cursor++;
+}
+
+/* Read the second hexadecimal operand. */
+if (*cursor == '-' || *cursor == '\0') {
+    printf("Error: invalid input.\n");
+    return 1;
+}
+
+errno = 0;
+value_b = strtoul(cursor, &end, 16);
+
+if (cursor == end || errno == ERANGE) {
+    printf("Error: invalid input.\n");
+    return 1;
+}
+
+/* Reject any extra characters. */
+while (isspace((unsigned char)*end)) {
+    end++;
+}
+
+if (*end != '\0') {
+    printf("Error: invalid input.\n");
+    return 1;
+}
+
+/* Check whether operands fit the selected field. */
+if (value_a >= limit || value_b >= limit) {
+    printf("Error: operands must be between 0 and 0x%X.\n",
+           limit - 1);
+    return 1;
+}
+
+a = (unsigned int)value_a;
+b = (unsigned int)value_b;
 
     uint16_t result = gf_multiply(
         (uint16_t)a, (uint16_t)b, m, polynomial
