@@ -88,6 +88,18 @@ run_error_case "Reject non-hexadecimal input" \
 
 run_error_case "Reject missing operand" \
     "1\n7\n" "Error: invalid input."
+run_error_case "Reject negative operand" \
+    "1\n-1 5\n" "Error: invalid input."
+
+run_error_case "Reject excessively large hexadecimal input" \
+    "2\nFFFFFFFFFFFFFFFFFFFFFFFF 2\n" "Error: invalid input."
+
+run_error_case "Reject extra trailing operand" \
+    "1\n7 D ABC\n" "Error: invalid input."
+
+run_error_case "Reject invalid hexadecimal character" \
+    "1\nG 2\n" "Error: invalid input."
+
 
 echo
 echo "=============================="
