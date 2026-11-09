@@ -40,7 +40,7 @@ run_error_case() {
     local expected="$3"
     local output
 
-    output="$(printf '%s' "$input" | "$BIN" 2>&1 || true)"
+    output="$(printf '%b' "$input" | "$BIN" 2>&1 || true)"
 
     if grep -Fq "$expected" <<< "$output"; then
         echo "PASS: $name"
