@@ -1,4 +1,6 @@
-
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -49,10 +51,29 @@ int main(void)
     printf("2. GF(2^8), polynomial x^8 + x^4 + x^3 + x + 1 (0x11B)\n");
     printf("Choose field (1 or 2): ");
 
-    if (scanf("%u", &m) != 1 || (m != 1 && m != 2)) {
-        printf("Error: invalid field choice.\n");
-        return 1;
-    }
+char input[128];
+char *end;
+unsigned long choice;
+
+if (fgets(input, sizeof(input), stdin) == NULL) {
+    printf("Error: invalid field choice.\n");
+    return 1;
+}
+
+errno = 0;
+choice = strtoul(input, &end, 10);
+
+while (isspace((unsigned char)*end)) {
+    end++;
+}
+
+if (input == end || errno == ERANGE ||
+    choice < 1 || choice > 2 || *end != '\0') {
+    printf("Error: invalid field choice.\n");
+    return 1;
+}
+
+m = (unsigned int)choice;
 
     if (m == 1) {
         m = 4;
