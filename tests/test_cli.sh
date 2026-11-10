@@ -77,6 +77,54 @@ run_commutativity_case() {
         fail=$((fail + 1))
     fi
 }
+run_distributivity_case() {
+    local name="$1"
+    local field="$2"
+    local a="$3"
+    local b="$4"
+    local c="$5"
+    local b_xor_c
+    local output_lhs
+    local output_ab
+    local output_ac
+    local result_lhs
+    local result_ab
+    local result_ac
+    local ab_value
+    local ac_value
+    local expected_rhs
+
+    b_xor_c="$(printf '%X' "$((16#$b ^ 16#$c))")"
+
+    output_lhs="$(printf '%s\n%s %s\n' "$field" "$a" "$b_xor_c" | "$BIN")"
+    output_ab="$(printf '%s\n%s %s\n' "$field" "$a" "$b" | "$BIN")"
+    output_ac="$(printf '%s\n%s %s\n' "$field" "$a" "$c" | "$BIN")"
+
+    result_lhs="$(sed -n 's/^A \* B = //p' <<< "$output_lhs")"
+    result_ab="$(sed -n 's/^A \* B = //p' <<< "$output_ab")"
+    result_ac="$(sed -n 's/^A \* B = //p' <<< "$output_ac")"
+
+    if [[ -z "$result_lhs" || -z "$result_ab" || -z "$result_ac" ]]; then
+        echo "FAIL: $name"
+        fail=$((fail + 1))
+        return
+    fi
+
+    ab_value=$((16#${result_ab#0x}))
+    ac_value=$((16#${result_ac#0x}))
+
+    printf -v expected_rhs '0x%X' "$((ab_value ^ ac_value))"
+
+    if [[ "$result_lhs" == "$expected_rhs" ]]; then
+        echo "PASS: $name"
+        pass=$((pass + 1))
+    else
+        echo "FAIL: $name"
+        echo "a * (b XOR c) = $result_lhs"
+        echo "(a * b) XOR (a * c) = $expected_rhs"
+        fail=$((fail + 1))
+    fi
+}
 
 echo
 echo "Testing GF(2^4)..."
@@ -113,6 +161,23 @@ run_commutativity_case "GF(2^8): one and maximum" 2 1 FF
 run_commutativity_case "GF(2^8): 57 and 83" 2 57 83
 run_commutativity_case "GF(2^8): 53 and CA" 2 53 CA
 run_commutativity_case "GF(2^8): maximum operands" 2 FF FF
+
+echo
+echo "Testing distributivity..."
+
+# GF(2^4)
+run_distributivity_case "GF(2^4): 3, 5, A" 1 3 5 A
+run_distributivity_case "GF(2^4): 7, 8, 4" 1 7 8 4
+run_distributivity_case "GF(2^4): F, 3, C" 1 F 3 C
+run_distributivity_case "GF(2^4): 1, A, 5" 1 1 A 5
+run_distributivity_case "GF(2^4): zero and maximum" 1 0 F 7
+
+# GF(2^8)
+run_distributivity_case "GF(2^8): 57, 83, CA" 2 57 83 CA
+run_distributivity_case "GF(2^8): 53, CA, FF" 2 53 CA FF
+run_distributivity_case "GF(2^8): 1, A5, 5B" 2 1 A5 5B
+run_distributivity_case "GF(2^8): FF, 80, 7F" 2 FF 80 7F
+run_distributivity_case "GF(2^8): zero and maximum" 2 0 FF 57
 echo
 echo "Testing invalid input..."
 
