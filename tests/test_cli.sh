@@ -51,6 +51,32 @@ run_error_case() {
         fail=$((fail + 1))
     fi
 }
+run_commutativity_case() {
+    local name="$1"
+    local field="$2"
+    local a="$3"
+    local b="$4"
+    local output_ab
+    local output_ba
+    local result_ab
+    local result_ba
+
+    output_ab="$(printf '%s\n%s %s\n' "$field" "$a" "$b" | "$BIN")"
+    output_ba="$(printf '%s\n%s %s\n' "$field" "$b" "$a" | "$BIN")"
+
+    result_ab="$(sed -n 's/^A \* B = //p' <<< "$output_ab")"
+    result_ba="$(sed -n 's/^A \* B = //p' <<< "$output_ba")"
+
+    if [[ -n "$result_ab" && "$result_ab" == "$result_ba" ]]; then
+        echo "PASS: $name"
+        pass=$((pass + 1))
+    else
+        echo "FAIL: $name"
+        echo "A * B = $result_ab"
+        echo "B * A = $result_ba"
+        fail=$((fail + 1))
+    fi
+}
 
 echo
 echo "Testing GF(2^4)..."
@@ -71,6 +97,22 @@ run_case "Reduction modulo 0x11B" 2 "57 83" "0xC1"
 run_case "Inverse relationship" 2 "53 CA" "0x1"
 run_case "Maximum operands" 2 "FF FF" "0x13"
 
+echo
+echo "Testing commutativity..."
+
+# GF(2^4)
+run_commutativity_case "GF(2^4): zero and maximum" 1 0 F
+run_commutativity_case "GF(2^4): one and maximum" 1 1 F
+run_commutativity_case "GF(2^4): 3 and 7" 1 3 7
+run_commutativity_case "GF(2^4): 5 and A" 1 5 A
+run_commutativity_case "GF(2^4): maximum operands" 1 F F
+
+# GF(2^8)
+run_commutativity_case "GF(2^8): zero and maximum" 2 0 FF
+run_commutativity_case "GF(2^8): one and maximum" 2 1 FF
+run_commutativity_case "GF(2^8): 57 and 83" 2 57 83
+run_commutativity_case "GF(2^8): 53 and CA" 2 53 CA
+run_commutativity_case "GF(2^8): maximum operands" 2 FF FF
 echo
 echo "Testing invalid input..."
 
