@@ -166,9 +166,7 @@ Script sẽ tự động biên dịch chương trình với các tùy chọn c�
 
 Kiểm tra tính chất:
 
-\[
-A \times B = B \times A
-\]
+A * B = B * A
 
 Thực hiện trên nhiều bộ dữ liệu thuộc cả GF(2⁴) và GF(2⁸).
 
@@ -176,11 +174,7 @@ Thực hiện trên nhiều bộ dữ liệu thuộc cả GF(2⁴) và GF(2⁸).
 
 Kiểm tra tính chất:
 
-\[
-A \times (B \oplus C)
-=
-(A \times B) \oplus (A \times C)
-\]
+A * (B XOR C) = (A * B) XOR (A * C)
 
 Trong đó XOR biểu diễn phép cộng trong trường hữu hạn GF(2ᵐ).
 
