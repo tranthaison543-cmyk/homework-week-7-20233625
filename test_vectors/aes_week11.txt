@@ -1,0 +1,15 @@
+BAI TAP TUAN 11 - AES
+Mon: Ly thuyet mat ma
+Hoc ky: 2026.1
+Giang vien: Co Hue
+
+Ban ro dau vao (128 bit):
+00000000000000000000000000000011
+
+Khoa bi mat (128 bit):
+00000000000000000000000000000000
+
+Yeu cau:
+1. Tinh khoa con cua vong 1.
+2. Tinh trang thai dau ra cua vong 1.
+3. In cac trang thai trung gian trong qua trinh thuc hien.
