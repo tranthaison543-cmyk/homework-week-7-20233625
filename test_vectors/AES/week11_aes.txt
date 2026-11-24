@@ -1,0 +1,23 @@
+==================================================
+TEST VECTOR AES-128 - BAI TAP TUAN 11
+Mon: Ly thuyet mat ma - 2026.1
+Giang vien: Co Hue
+==================================================
+
+[INPUT]
+Plaintext (de bai) : 0000000000000011
+Key       (de bai) : 0000000000000000
+
+[INPUT AES-128 - 128 BIT]
+Plaintext          : 00000000000000000000000000000011
+Key                : 00000000000000000000000000000000
+
+[EXPECTED OUTPUT]
+Ciphertext         : 0410BEFCCDE6944B69DD007DEBE39A9D
+
+[DESCRIPTION]
+AES-128 encryption.
+The original 64-bit plaintext and key are zero-extended
+to 128 bits before encryption.
+
+==================================================

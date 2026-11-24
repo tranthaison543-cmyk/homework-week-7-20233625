@@ -187,6 +187,16 @@ void key_expansion(const byte key[16], byte round_keys[176])
 }
 
 //  CAC VONG MA HOA AES
+// Thuc hien vong AES thu nhat va in trang thai dau ra
+void aes_round1(byte state[16], const byte round_key[16])
+{
+    sub_bytes(state);
+    shift_rows(state);
+    mix_columns(state);
+    add_round_key(state, round_key);
+
+    print_state("Trang thai dau ra vong 1:", state);
+}
 // Vong AES thong thuong
 void aes_round(byte state[16], const byte round_key[16])
 {
@@ -210,15 +220,20 @@ void aes_encrypt(byte state[16], const byte round_keys[176])
     // AddRoundKey ban dau
     add_round_key(state, round_keys);
 
-    // Vong 1 den vong 9
-    for (int round = 1; round < 10; round++) {
+    // In khoa con vong 1
+    print_state("Round Key 1:", &round_keys[16]);
+
+    // Vong 1: In trang thai dau ra
+    aes_round1(state, &round_keys[16]);
+
+    // Vong 2 den vong 9
+    for (int round = 2; round < 10; round++) {
         aes_round(state, &round_keys[round * 16]);
     }
 
     // Vong 10
     aes_final_round(state, &round_keys[160]);
 }
-
 
 int main(void)
 {

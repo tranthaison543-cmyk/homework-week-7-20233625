@@ -1,0 +1,101 @@
+Round Key 0:
+
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+
+Round Key 1:
+
+62 62 62 62 
+63 63 63 63 
+63 63 63 63 
+63 63 63 63 
+
+Round Key 2:
+
+9B F9 9B F9 
+98 FB 98 FB 
+98 FB 98 FB 
+C9 AA C9 AA 
+
+Round Key 3:
+
+90 69 F2 0B 
+97 6C F4 0F 
+34 CF 57 AC 
+50 FA 33 99 
+
+Round Key 4:
+
+EE 87 75 7E 
+06 6A 9E 91 
+DA 15 42 EE 
+7B 81 B2 2B 
+
+Round Key 5:
+
+7F F8 8D F3 
+2E 44 DA 4B 
+2B 3E 7C 92 
+88 09 BB 90 
+
+Round Key 6:
+
+EC 14 99 6A 
+61 25 FF B4 
+4B 75 09 9B 
+85 8C 37 A7 
+
+Round Key 7:
+
+21 35 AC C6 
+75 50 AF 1B 
+17 62 6B F0 
+87 0B 3C 9B 
+
+Round Key 8:
+
+0E 3B 97 51 
+F9 A9 06 1D 
+03 61 0A FA 
+33 38 04 9F 
+
+Round Key 9:
+
+B1 8A 1D 4C 
+D4 7D 7B 66 
+D8 B9 B3 49 
+E2 DA DE 41 
+
+Round Key 10:
+
+B4 3E 23 6F 
+EF 92 E9 8F 
+5B E2 51 18 
+CB 11 CF 8E 
+
+Trang thai ban ro:
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 11 
+
+Round Key 1:
+62 62 62 62 
+63 63 63 63 
+63 63 63 63 
+63 63 63 63 
+
+Trang thai dau ra vong 1:
+E0 01 01 01 
+E1 00 00 00 
+38 00 00 00 
+D9 00 00 00 
+
+Ciphertext:
+04 CD 69 EB 
+10 E6 DD E3 
+BE 94 00 9A 
+FC 4B 7D 9D 
+
