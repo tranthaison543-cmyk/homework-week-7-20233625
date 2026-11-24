@@ -118,10 +118,41 @@ void shift_rows(byte state[16]) {
     state[11] = state[7];
     state[7] = temp;
 }
+// Nhan mot byte voi 02 trong GF(2^8)
+byte xtime(byte x) {
+    if (x & 0x80) {
+        return (byte)((x << 1) ^ 0x1B);
+    }
+
+    return (byte)(x << 1);
+}
+
+// Nhan mot byte voi 03 trong GF(2^8)
+byte multiply_by_03(byte x) {
+    return xtime(x) ^ x;
+}
+// Thuc hien phep bien doi MixColumns
+void mix_columns(byte state[16]) {
+    for (int col = 0; col < 4; col++) {
+        int i = col * 4;
+
+        byte a0 = state[i];
+        byte a1 = state[i + 1];
+        byte a2 = state[i + 2];
+        byte a3 = state[i + 3];
+
+        state[i]     = xtime(a0) ^ multiply_by_03(a1) ^ a2 ^ a3;
+        state[i + 1] = a0 ^ xtime(a1) ^ multiply_by_03(a2) ^ a3;
+        state[i + 2] = a0 ^ a1 ^ xtime(a2) ^ multiply_by_03(a3);
+        state[i + 3] = multiply_by_03(a0) ^ a1 ^ a2 ^ xtime(a3);
+    }
+}
     print_state("Trang thai sau AddRoundKey:", plaintext);
 sub_bytes(plaintext);
 print_state("Trang thai sau SubBytes:", plaintext);
 shift_rows(plaintext);
 print_state("Trang thai sau ShiftRows:", plaintext); 
-   return 0;
+mix_columns(plaintext);
+print_state("Trang thai sau MixColumns:", plaintext); 
+  return 0;
 }
