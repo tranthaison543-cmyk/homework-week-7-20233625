@@ -1,7 +1,7 @@
 # BÀI TẬP LÝ THUYẾT MẬT MÃ – DES VÀ AES-128
 
 **Học kỳ:** 2026.1
-**Giảng viên:** Cô Huệ
+**Giảng viên:** Cô Tạ Thị Kim Huệ
 **Ngôn ngữ lập trình:** C
 
 ## 1. Mục tiêu
