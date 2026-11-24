@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-
+#include <stdlib.h>
+#include <ctype.h>
 typedef uint64_t u64;
 typedef uint32_t u32;
 
@@ -253,17 +254,72 @@ static u64 des_crypt(u64 block, const u64 subkeys[16], int decrypt)
     // Hoan vi cuoi FP
     return permute(pre_output, 64, FP, 64);
 }
+static int input_hex64(const char *message, u64 *value)
+{
+    char buffer[100];
+    char *end;
 
+    printf("%s", message);
+
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+        return 0;
+    }
+
+    char *start = buffer;
+
+    // Bo khoang trang o dau
+    while (isspace((unsigned char)*start)) {
+        start++;
+    }
+
+    // Chuyen hexadecimal sang so 64 bit
+    unsigned long long result = strtoull(start, &end, 16);
+
+    // Khong co ky tu hexadecimal
+    if (start == end) {
+        return 0;
+    }
+
+    // Luu do dai chuoi hex truoc khi bo khoang trang
+    size_t hex_length = (size_t)(end - start);
+
+    // Chi chap nhan toi da 16 ky tu hex
+    if (hex_length > 16) {
+        return 0;
+    }
+
+    // Bo khoang trang o cuoi
+    while (isspace((unsigned char)*end)) {
+        end++;
+    }
+
+    // Khong chap nhan ky tu khong hop le
+    if (*end != '\0') {
+        return 0;
+    }
+
+    *value = (u64)result;
+    return 1;
+}
 int main(void)
 {
-    // Test vector DES chuan
-    u64 plaintext = 0x0123456789ABCDEFULL;
-    u64 key = 0x133457799BBCDFF1ULL;
-
+    u64 plaintext, key;
     u64 subkeys[16];
 
-    printf("===== DES ENCRYPTION =====\n");
-    printf("Plaintext = %016llX\n",
+    printf("========== DES ENCRYPTION ==========\n");
+
+    // Nhap plaintext va key
+    if (!input_hex64("Nhap Plaintext (hex): ", &plaintext)) {
+        printf("Plaintext khong hop le!\n");
+        return 1;
+    }
+
+    if (!input_hex64("Nhap Key (hex): ", &key)) {
+        printf("Key khong hop le!\n");
+        return 1;
+    }
+
+    printf("\nPlaintext = %016llX\n",
            (unsigned long long)plaintext);
     printf("Key       = %016llX\n",
            (unsigned long long)key);
@@ -289,12 +345,6 @@ int main(void)
         printf("DES decryption: PASS\n");
     } else {
         printf("DES decryption: FAIL\n");
-    }
-
-    if (ciphertext == 0x85E813540F0AB405ULL) {
-        printf("DES encryption test vector: PASS\n");
-    } else {
-        printf("DES encryption test vector: FAIL\n");
     }
 
     return 0;
