@@ -89,8 +89,39 @@ void sub_bytes(byte state[16]) {
         state[i] = sbox[state[i]];
     }
 }
+// Dich vong trai cac hang cua State
+void shift_rows(byte state[16]) {
+    byte temp;
+
+    // Hang 0: giu nguyen
+
+    // Hang 1: dich trai 1 byte
+    temp = state[1];
+    state[1] = state[5];
+    state[5] = state[9];
+    state[9] = state[13];
+    state[13] = temp;
+
+    // Hang 2: dich trai 2 byte
+    temp = state[2];
+    state[2] = state[10];
+    state[10] = temp;
+
+    temp = state[6];
+    state[6] = state[14];
+    state[14] = temp;
+
+    // Hang 3: dich trai 3 byte (tuong duong dich phai 1 byte)
+    temp = state[3];
+    state[3] = state[15];
+    state[15] = state[11];
+    state[11] = state[7];
+    state[7] = temp;
+}
     print_state("Trang thai sau AddRoundKey:", plaintext);
 sub_bytes(plaintext);
 print_state("Trang thai sau SubBytes:", plaintext);
-    return 0;
+shift_rows(plaintext);
+print_state("Trang thai sau ShiftRows:", plaintext); 
+   return 0;
 }
