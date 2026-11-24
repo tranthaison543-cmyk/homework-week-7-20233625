@@ -1,8 +1,10 @@
+
 #include <stdio.h>
 #include <stdint.h>
 
 typedef uint8_t byte;
-// Bang S-box dung trong phep bien doi SubBytes cua AES
+
+// Bang S-box cua AES
 static const byte sbox[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
     0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -37,60 +39,47 @@ static const byte sbox[256] = {
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68,
     0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
-// In ma trận State theo thứ tự hàng và cột.
+
+// Bang hang so vong Rcon cua AES-128
+static const byte rcon[10] = {
+    0x01, 0x02, 0x04, 0x08, 0x10,
+    0x20, 0x40, 0x80, 0x1B, 0x36
+};
+
+// In ma tran State theo thu tu hang va cot
 void print_state(const char *label, const byte state[16])
 {
     printf("%s\n", label);
 
-    for (int row = 0; row < 4; row++)
-    {
-        for (int col = 0; col < 4; col++)
-        {
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
             printf("%02X ", state[col * 4 + row]);
         }
-
         printf("\n");
     }
 
     printf("\n");
 }
 
-int main(void)
-{
-    // Ban ro 128 bit cua bai tap tuan 11.
-    byte plaintext[16] = {
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x11
-    };
-
-    // Khoa AES-128: 128 bit.
-    byte key[16] = {
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-    };
-// Thuc hien phep XOR State voi khoa con.
+// Phep XOR State voi khoa vong
 void add_round_key(byte state[16], const byte round_key[16])
 {
-    for (int i = 0; i < 16; i++)
-    {
+    for (int i = 0; i < 16; i++) {
         state[i] ^= round_key[i];
     }
 }
-    print_state("Trang thai ban ro:", plaintext);
-    print_state("Khoa ban dau:", key);
-    add_round_key(plaintext, key);
+
 // Thay the tung byte trong State bang gia tri tu bang S-box
-void sub_bytes(byte state[16]) {
+void sub_bytes(byte state[16])
+{
     for (int i = 0; i < 16; i++) {
         state[i] = sbox[state[i]];
     }
 }
+
 // Dich vong trai cac hang cua State
-void shift_rows(byte state[16]) {
+void shift_rows(byte state[16])
+{
     byte temp;
 
     // Hang 0: giu nguyen
@@ -111,15 +100,17 @@ void shift_rows(byte state[16]) {
     state[6] = state[14];
     state[14] = temp;
 
-    // Hang 3: dich trai 3 byte (tuong duong dich phai 1 byte)
+    // Hang 3: dich trai 3 byte
     temp = state[3];
     state[3] = state[15];
     state[15] = state[11];
     state[11] = state[7];
     state[7] = temp;
 }
+
 // Nhan mot byte voi 02 trong GF(2^8)
-byte xtime(byte x) {
+byte xtime(byte x)
+{
     if (x & 0x80) {
         return (byte)((x << 1) ^ 0x1B);
     }
@@ -128,11 +119,14 @@ byte xtime(byte x) {
 }
 
 // Nhan mot byte voi 03 trong GF(2^8)
-byte multiply_by_03(byte x) {
+byte multiply_by_03(byte x)
+{
     return xtime(x) ^ x;
 }
+
 // Thuc hien phep bien doi MixColumns
-void mix_columns(byte state[16]) {
+void mix_columns(byte state[16])
+{
     for (int col = 0; col < 4; col++) {
         int i = col * 4;
 
@@ -147,12 +141,111 @@ void mix_columns(byte state[16]) {
         state[i + 3] = multiply_by_03(a0) ^ a1 ^ a2 ^ xtime(a3);
     }
 }
+
+// Xoay trai mot tu 4 byte
+void rot_word(byte word[4])
+{
+    byte temp = word[0];
+
+    word[0] = word[1];
+    word[1] = word[2];
+    word[2] = word[3];
+    word[3] = temp;
+}
+
+// Thay the tung byte cua mot tu bang gia tri trong S-box
+void sub_word(byte word[4])
+{
+    for (int i = 0; i < 4; i++) {
+        word[i] = sbox[word[i]];
+    }
+}
+
+// Sinh 11 khoa vong cho AES-128
+void key_expansion(const byte key[16], byte round_keys[176])
+{
+    // Sao chep khoa ban dau vao 4 tu dau tien
+    for (int i = 0; i < 16; i++) {
+        round_keys[i] = key[i];
+    }
+
+    byte temp[4];
+
+    // Sinh 40 tu tiep theo
+    for (int i = 4; i < 44; i++) {
+        // Lay tu ngay truoc do
+        for (int j = 0; j < 4; j++) {
+            temp[j] = round_keys[(i - 1) * 4 + j];
+        }
+
+        // Xu ly dac biet moi 4 tu
+        if (i % 4 == 0) {
+            rot_word(temp);
+            sub_word(temp);
+            temp[0] ^= rcon[i / 4 - 1];
+        }
+
+        // XOR voi tu cach do 4 vi tri
+        for (int j = 0; j < 4; j++) {
+            round_keys[i * 4 + j] =
+                round_keys[(i - 4) * 4 + j] ^ temp[j];
+        }
+    }
+}
+
+// In 11 khoa vong cua AES-128
+void print_round_keys(const byte round_keys[176])
+{
+    for (int round = 0; round <= 10; round++) {
+        printf("Round Key %d:\n", round);
+        print_state("", &round_keys[round * 16]);
+    }
+}
+
+int main(void)
+{
+    // Ban ro 128 bit cua bai tap tuan 11
+    byte plaintext[16] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x11
+    };
+
+    // Khoa AES-128: 128 bit
+    byte key[16] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+
+    byte round_keys[176];
+
+    // Sinh va in 11 khoa vong
+    key_expansion(key, round_keys);
+    print_round_keys(round_keys);
+
+    // Thuc hien AddRoundKey ban dau
+    print_state("Trang thai ban ro:", plaintext);
+    print_state("Khoa ban dau:", key);
+
+    add_round_key(plaintext, key);
     print_state("Trang thai sau AddRoundKey:", plaintext);
-sub_bytes(plaintext);
-print_state("Trang thai sau SubBytes:", plaintext);
-shift_rows(plaintext);
-print_state("Trang thai sau ShiftRows:", plaintext); 
-mix_columns(plaintext);
-print_state("Trang thai sau MixColumns:", plaintext); 
-  return 0;
+
+    // Vong AES dau tien
+    sub_bytes(plaintext);
+    print_state("Trang thai sau SubBytes:", plaintext);
+
+    shift_rows(plaintext);
+    print_state("Trang thai sau ShiftRows:", plaintext);
+
+    mix_columns(plaintext);
+    print_state("Trang thai sau MixColumns:", plaintext);
+
+    // AddRoundKey voi khoa vong 1
+    add_round_key(plaintext, &round_keys[16]);
+    print_state("Trang thai sau AddRoundKey vong 1:", plaintext);
+
+    return 0;
 }
